@@ -1,187 +1,171 @@
-# FDS Ultimate
 
-## 엔터프라이즈 보험 사기 탐지 시스템
+# Claim FDS
+## 정책 효과 검증 및 확장 의사결정 시스템
 
-> Data → Intelligence → Decision\
-> GCP Free VM 환경에서 운영 가능한 실전형 Fraud Detection 플랫폼
+---
 
-------------------------------------------------------------------------
+# 1. 목적
 
-# 1. Executive Summary
+본 시스템은 보험금 사기 탐지 모델의 예측 성능 자체가 아니라  
+정책 적용에 따른 재무 효과를 검증하기 위한 구조임  
 
-FDS Ultimate는 보험금 사기 탐지를 위한 엔터프라이즈급 머신러닝 기반
-시스템입니다.
+핵심 목적은 다음과 같음
 
-주요 목적:
+- 통제군 대비 처리군 재무 절감 효과 측정
+- 통계적 유의성 확보 여부 판단
+- 세그먼트별 효과 차이 분석
+- 가드레일 통과 시에만 정책 확대
 
--   고위험 보험 청구건 탐지 (Risk Scoring)
--   세그먼트별 이질적 효과 분석 (HTE)
--   임원 보고용 KPI 대시보드 제공
--   원클릭 PDF 보고서 생성
--   자동화된 리포팅 워크플로우 지원
+---
 
-------------------------------------------------------------------------
+# 2. 전체 아키텍처
 
-# 2. Streamlit Cloud 배포 링크
-
-아래 링크에서 데모 확인:
-
-👉 https://YOUR-STREAMLIT-CLOUD-URL.streamlit.app
-
-------------------------------------------------------------------------
-
-# 3. 시스템 아키텍처
-
-Raw Data\
-↓\
-Feature Engineering\
-↓\
-ML Model Training\
-↓\
-Risk Scoring\
-↓\
-Segment Analysis (HTE)\
-↓\
-Streamlit Dashboard\
-↓\
-PDF Export & Email
-
-------------------------------------------------------------------------
-
-# 4. 주요 기능
-
-## 4.1 리스크 스코어링
-
--   보험 청구건 사기 확률 산출
--   고위험군 자동 분류
-
-## 4.2 세그먼트 분석
-
--   채널별 효과 분석
--   상품별 위험도 비교
--   지역별 패턴 분석
-
-## 4.3 임원 보고 대시보드
-
--   KPI 요약
--   리스크 분포 시각화
--   PDF Export 기능
-
-------------------------------------------------------------------------
-
-# 5. 기술 스택
-
--   Python 3.10+
--   scikit-learn
--   pandas
--   Streamlit
--   Plotly
--   GCP Free VM
-
-------------------------------------------------------------------------
-
-# 6. GCP Free VM 설치 방법
-
-## 6.1 저장소 클론
-
-``` bash
-git clone https://github.com/Obok-obok/fds-ultimate.git
-cd fds-ultimate
+```mermaid
+flowchart TD
+A[Claims Data] --> B[Feature Engineering]
+B --> C[Model Training]
+C --> D[Batch Scoring]
+D --> E[Experiment Assignment]
+E --> F[Impact Measurement]
+F --> G[Statistical Significance]
+G --> H[Guardrail Decision]
+H --> I[Dashboard and Report]
 ```
+---
 
-## 6.2 가상환경 생성
+# 3. 운영 흐름 (End-to-End Flow)
 
-``` bash
-python3 -m venv venv
-source venv/bin/activate
-```
+① 데이터 적재  
+- 파일: data/claims.csv  
+- 로딩 함수: src/io_utils.py → load_claims()
 
-## 6.3 패키지 설치
+② 피처 생성  
+- 파일: src/features.py  
+- 함수: build_features()  
+- 범주형 인코딩, 수치 정규화, 파생 변수 생성했음
 
-``` bash
-pip install --upgrade pip
+③ 모델 학습  
+- 파일: src/train.py  
+- 함수: train_model()  
+- 검증: src/validate.py → evaluate_model()  
+- 확률 보정: src/calibrate.py → calibrate_model()
+
+④ 배치 스코어링  
+- 파일: src/score_batch_prod.py  
+- 함수: score_batch()  
+- 결과: out/decision_ledger.csv 생성했음
+
+⑤ 실험군 배정  
+- 파일: src/experiment.py  
+- 함수: assign_experiment_group()  
+- Treatment 비중 설정 가능함
+
+⑥ 효과 측정  
+- 파일: src/impact_panel.py  
+- 함수: compute_panel_impact()  
+- 통제군·처리군 평균 지급액 계산했음
+
+⑦ 통계 검정  
+- 파일: src/stats_impact_scipy.py  
+- 함수: welch_ttest()  
+- p-value 산출했음
+
+⑧ 가드레일 판정  
+- 파일: src/guardrails.py  
+- 함수: evaluate_guardrails()  
+- GO / HOLD / ROLLBACK 판정했음
+
+⑨ 세그먼트 경보  
+- 파일: src/segment_alerts.py  
+- 함수: detect_segment_anomaly()
+
+⑩ 리포트 생성  
+- 파일: src/executive_report.py  
+- 함수: generate_summary()  
+- PDF: src/pdf_onepager.py → create_pdf()
+
+⑪ 대시보드 표시  
+- 파일: app_exec_dashboard.py  
+- out/*.csv 기반 지표 렌더링했음
+
+---
+
+# 4. 대시보드 지표 산출 매핑
+
+| 지표 | 계산 로직 | 파일 | 함수 |
+|------|-----------|------|------|
+| MTD 절감 | 월 누적 (통제-처리) 합 | impact_panel.py | compute_panel_impact |
+| QTD 절감 | 분기 누적 합 | impact_panel.py | compute_panel_impact |
+| 건당 지급 개선 | avg_control - avg_treatment | impact_panel.py | compute_panel_impact |
+| 검토 전환율 | review_flag 비율 | experiment.py | assign_experiment_group |
+| Treatment 비중 | treatment / total | experiment.py | assign_experiment_group |
+| p-value | Welch t-test | stats_impact_scipy.py | welch_ttest |
+| Guardrail 상태 | 조건 기반 판정 | guardrails.py | evaluate_guardrails |
+| 세그먼트 경보 | 이상치 탐지 | segment_alerts.py | detect_segment_anomaly |
+
+---
+
+# 5. 적용 통계 이론 및 수식
+
+| 항목 | 수식 | 적용 파일 | 설명 |
+|------|------|-----------|------|
+| 평균 효과 (ATE) | Δ = E[Y|C] − E[Y|T] | impact_panel.py | 지급 평균 차이 |
+| HTE | HTE_s = E[Y|C,S=s] − E[Y|T,S=s] | impact_panel.py | 세그먼트별 효과 |
+| Welch t-test | t = (μ_c − μ_t) / √(σ_c²/n_c + σ_t²/n_t) | stats_impact_scipy.py | 등분산 가정 없음 |
+| p-value | P(T > t) | stats_impact_scipy.py | 통계적 유의성 판단 |
+
+---
+
+# 6. Guardrail 로직
+
+확대 조건은 다음을 모두 충족해야 함
+
+- p-value < threshold  
+- Δ > 0  
+- 세그먼트 이상 급증 없음  
+
+위반 시 자동 HOLD 또는 ROLLBACK 처리했음
+
+---
+
+# 7. 실행 방법
+
+## 환경 구성
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-------------------------------------------------------------------------
+## 전체 실행
 
-# 7. 모델 학습 실행
-
-``` bash
-bash scripts/train.sh
+```bash
+python -m src.train
+python -m src.score_batch_prod
+python -m src.experiment
+python -m src.impact_panel
+python -m src.stats_impact_scipy
+python -m src.guardrails
+python -m src.executive_report
+streamlit run app_exec_dashboard.py
 ```
 
-또는
+---
 
-``` bash
-python src/train_model.py
-```
+# 8. Streamlit Cloud 배포
 
-학습 결과: - models/ 폴더에 모델 저장 - 성능 지표 출력
+1. GitHub 업로드했음  
+2. https://streamlit.io/cloud 접속  
+3. app_exec_dashboard.py 선택  
+4. Deploy 완료  
 
-------------------------------------------------------------------------
+배포 URL
 
-# 8. 리스크 스코어 실행
+https://awesome-fds-9qyj9byrubzicscijfsgnh.streamlit.app/
 
-``` bash
-bash scripts/score.sh
-```
+---
 
-또는
+# License
 
-``` bash
-python src/score.py
-```
-
-------------------------------------------------------------------------
-
-# 9. 대시보드 실행
-
-``` bash
-streamlit run app.py --server.port 8501
-```
-
-접속 주소:
-
-http://YOUR_VM_EXTERNAL_IP:8501
-
-------------------------------------------------------------------------
-
-# 10. requirements.txt 예시
-
-    pandas
-    numpy
-    scikit-learn
-    plotly
-    streamlit
-    matplotlib
-    joblib
-
-requirements 재생성:
-
-``` bash
-pip freeze > requirements.txt
-```
-
-------------------------------------------------------------------------
-
-# 11. 프로젝트 구조
-
-fds-ultimate/ │ ├── app.py ├── requirements.txt ├── README.md ├── data/
-├── models/ ├── src/ ├── scripts/
-
-------------------------------------------------------------------------
-
-# 12. Enterprise AI 원칙 반영
-
-본 시스템은 『The Theory and Practice of Enterprise AI』의 원칙을
-반영하여 설계되었습니다:
-
--   문제 정의 중심 설계
--   데이터 → 모델 → 의사결정 흐름 구조화
--   KPI 기반 성과 모니터링
--   해석 가능한 리스크 분석
-
-------------------------------------------------------------------------
-
-작성자: Obok-obok
+Internal Use Only

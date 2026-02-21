@@ -173,12 +173,6 @@ scripts/   # (추가) 운영 재현 스크립트
 
 ---
 
-# 11. 운영 재현 스크립트
-
-`scripts/run_all.sh`로 “환경 구성 → 산출물 생성 → 대시보드 실행”을 1회 실행으로 재현 가능하게 구성했음  
-
----
-
 # 12. 실행 방법
 
 ## 12.1 requirements 설치
@@ -198,17 +192,39 @@ python -m src.simulate_production_outputs --scenario GO --days 120 --seed 42
 streamlit run app_exec_dashboard.py --server.address 0.0.0.0 --server.port 8501
 ```
 
----
+## 12.4 Makefile 기반 실행(권장)
 
-# 13. Streamlit Cloud 배포
+```bash
+# 1) 가상환경 생성 + requirements 설치
+make install
 
-- GitHub에 레포 업로드했음  
-- Streamlit Cloud에서 레포 선택했음  
-- Entry file로 `app_exec_dashboard.py` 지정했음  
+# 2) 데모 산출물 생성(빠름)
+make demo
 
-배포 URL 예시임  
+# 3) 대시보드 실행
+make dashboard
+```
 
-https://your-app-name.streamlit.app  
+풀 파이프라인 실행도 가능함  
+
+```bash
+make full
+make dashboard
+```
+
+## 12.5 Shell Script 기반 실행(1회 실행)
+
+```bash
+# 데모(권장)
+bash scripts/run_all.sh demo
+
+# 풀 파이프라인
+bash scripts/run_all.sh full
+```
+
+## 12.6 Dashboard 샘플
+
+https://awesome-fds-9qyj9byrubzicscijfsgnh.streamlit.app/ 
 
 ---
 

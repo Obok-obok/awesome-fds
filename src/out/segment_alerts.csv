@@ -1,0 +1,3 @@
+segment,metric,value,threshold,status
+channel=GA,FDR,0.02,0.05,OK
+product_line=HEALTH,FDR,0.03,0.05,OK

@@ -1,0 +1,25 @@
+{
+  "current": {
+    "policy_version": "P2",
+    "control_rate": 0.1,
+    "mode": "EXPERIMENT",
+    "created_at": "2026-02-21T11:19:35.878333Z",
+    "notes": "hold. effect_source=Welch | not_significant(p=0.5413, ci_lo=-32665.692897376397)"
+  },
+  "history": [
+    {
+      "policy_version": "P0",
+      "control_rate": 0.1,
+      "mode": "EXPERIMENT",
+      "created_at": "INIT",
+      "notes": "auto-created"
+    },
+    {
+      "policy_version": "P1",
+      "control_rate": 0.1,
+      "mode": "EXPERIMENT",
+      "created_at": "2026-02-21T11:03:42.510638Z",
+      "notes": "hold. effect_source=Welch | not_significant(p=0.5413, ci_lo=-32665.692897376397)"
+    }
+  ]
+}

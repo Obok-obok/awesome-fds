@@ -1,0 +1,2 @@
+test,effect_per_claim,welch_p_value,n_control,n_treatment
+Welch t-test,14767,0.031,600,6000

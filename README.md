@@ -18,6 +18,16 @@
 
 ---
 
+# 1.1 Executive Summary (임원 요약)
+
+본 FDS는 “모델 성능”이 아니라 “정책 효과”를 검증·확장하는 운영 체계로 설계되었음.  
+의사결정은 **재무 효과 → 통계적 신뢰 → 운영 리스크(Guardrail)** 순으로 고정했음.
+
+- **재무 효과(절감)**: 처리군 vs 통제군 지급액 차이로 절감 규모 산출했음  
+- **유의성(신뢰)**: Welch t-test로 우연 가능성(p-value) 통제했음  
+- **확장 전략**: HTE로 세그먼트별 효과 차이를 확인해 선택적 확대 가능하도록 했음  
+- **리스크 통제**: Guardrail 미충족 시 GO 금지(hold/rollback)하도록 설계했음
+
 # 2. 주요 기능
 
 - 청구 단위 리스크 점수 산출 및 처리/통제 실험 
@@ -46,16 +56,16 @@
 <div align="left">
 
 ```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 45, 'rankSpacing': 55}, 'themeVariables': {'fontSize': '14px'}}}%%
 flowchart TD
-A[Claims] 
---> B[Features]
---> C[Model]
---> D[Scoring]
---> E[Experiment]
---> F[Impact]
---> G[Statistical Test]
---> H[Guardrail]
---> I[Report & Dashboard]
+A[Claims] --> B[Features]
+B --> C[Model]
+C --> D[Scoring]
+D --> E[Experiment]
+E --> F[Impact]
+F --> G[Statistical Test]
+G --> H[Guardrail]
+H --> I[Report & Dashboard]
 ```
 
 </div>
@@ -150,19 +160,87 @@ scripts/   # (추가) 운영 재현 스크립트
 
 # 9. 지표(카드)별 입력파일 ↔ 계산 함수 ↔ 상위 산출 로직 매핑
 
-| 표시 라벨 | 입력(out/) | 계산/포맷 함수 | 상위 산출 스크립트 |
-|---|---|---|---|
-| `MTD 절감(추정)` / `월 절감(추정)` | `impact_monthly_timeseries.csv`(우선) / `decision_ledger.csv`(fallback) | `src.telemetry.compute_saving_kpis()` 내부에서 `compute_savings_from_timeseries()` → fallback `compute_savings_from_ledger()` | 데모: `simulate_production_outputs.py` / 운영: `impact_panel.py` + ledger |
-| `오늘 절감(추정)`(리포트/근거 영역) | 동일 | `src.telemetry.compute_saving_kpis()` → `saving_today` | 동일 |
-| `분기 누적 절감(추정)` | 동일 | `src.telemetry.compute_saving_kpis()` → `saving_qtd` | 동일 |
-| `금일 청구 건수` | `decision_ledger.csv` | `src.telemetry.compute_ops_kpis()` → `n_claims_today` | `score_batch_prod.py` |
-| `검토 전환율` | `decision_ledger.csv` | `src.telemetry.compute_ops_kpis()` → `review_rate` | `experiment.py` + ledger |
-| `처리 비중` | `decision_ledger.csv` | `src.telemetry.compute_ops_kpis()` → `treat_share` | `experiment.py` |
-| `평균 리스크 점수` | `decision_ledger.csv` | `src.telemetry.compute_ops_kpis()` → `avg_model_score` | `score_batch_prod.py` |
-| `월 목표 달성률` | `impact_monthly_timeseries.csv` + 목표값 | `app_exec_dashboard.py` → `mini_progress()` | 목표: `src/config.py`(CFG) |
-| `가드레일 상태` / `유의확률(p)` / `세그먼트 경보` | `guardrails_decision.csv`, `segment_alerts.csv`, `impact_significance_scipy.csv` | `app_exec_dashboard.py` → `guardrail()` (배지/카드) | `guardrails.py`, `segment_alerts.py`, `stats_impact_scipy.py` |
-| `관측 효과(건당)` / `통제군 표본수` / `처리군 표본수` | `impact_panel.csv` | 대시보드에서 CSV 읽어 포맷(`krw`, `fmt_int`) | `impact_panel.py` |
-| `대기 건수` / `SLA 위반` / `처리 완료` | `review_queue.csv` 또는 ledger 파생 | `src.telemetry.compute_ops_kpis()` 또는 대시보드 집계 | 운영/데모 생성 로직 |
+<table>
+<colgroup>
+<col style="width: 28%;">
+<col style="width: 24%;">
+<col style="width: 28%;">
+<col style="width: 20%;">
+</colgroup>
+<thead><tr>
+<th>표시 라벨</th>
+<th>입력(out/)</th>
+<th>계산/포맷 함수</th>
+<th>상위 산출 스크립트</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>MTD 절감(추정)</code> / <code>월 절감(추정)</code></td>
+<td><code>impact_monthly_timeseries.csv</code>(우선) / <code>decision_ledger.csv</code>(fallback)</td>
+<td><code>src.telemetry.compute_saving_kpis()</code> 내부에서 <code>compute_savings_from_timeseries()</code> → fallback <code>compute_savings_from_ledger()</code></td>
+<td>데모: <code>simulate_production_outputs.py</code> / 운영: <code>impact_panel.py</code> + ledger</td>
+</tr>
+<tr>
+<td><code>오늘 절감(추정)</code>(리포트/근거 영역)</td>
+<td>동일</td>
+<td><code>src.telemetry.compute_saving_kpis()</code> → <code>saving_today</code></td>
+<td>동일</td>
+</tr>
+<tr>
+<td><code>분기 누적 절감(추정)</code></td>
+<td>동일</td>
+<td><code>src.telemetry.compute_saving_kpis()</code> → <code>saving_qtd</code></td>
+<td>동일</td>
+</tr>
+<tr>
+<td><code>금일 청구 건수</code></td>
+<td><code>decision_ledger.csv</code></td>
+<td><code>src.telemetry.compute_ops_kpis()</code> → <code>n_claims_today</code></td>
+<td><code>score_batch_prod.py</code></td>
+</tr>
+<tr>
+<td><code>검토 전환율</code></td>
+<td><code>decision_ledger.csv</code></td>
+<td><code>src.telemetry.compute_ops_kpis()</code> → <code>review_rate</code></td>
+<td><code>experiment.py</code> + ledger</td>
+</tr>
+<tr>
+<td><code>처리 비중</code></td>
+<td><code>decision_ledger.csv</code></td>
+<td><code>src.telemetry.compute_ops_kpis()</code> → <code>treat_share</code></td>
+<td><code>experiment.py</code></td>
+</tr>
+<tr>
+<td><code>평균 리스크 점수</code></td>
+<td><code>decision_ledger.csv</code></td>
+<td><code>src.telemetry.compute_ops_kpis()</code> → <code>avg_model_score</code></td>
+<td><code>score_batch_prod.py</code></td>
+</tr>
+<tr>
+<td><code>월 목표 달성률</code></td>
+<td><code>impact_monthly_timeseries.csv</code> + 목표값</td>
+<td><code>app_exec_dashboard.py</code> → <code>mini_progress()</code></td>
+<td>목표: <code>src/config.py</code>(CFG)</td>
+</tr>
+<tr>
+<td><code>가드레일 상태</code> / <code>유의확률(p)</code> / <code>세그먼트 경보</code></td>
+<td><code>guardrails_decision.csv</code>, <code>segment_alerts.csv</code>, <code>impact_significance_scipy.csv</code></td>
+<td><code>app_exec_dashboard.py</code> → <code>guardrail()</code> (배지/카드)</td>
+<td><code>guardrails.py</code>, <code>segment_alerts.py</code>, <code>stats_impact_scipy.py</code></td>
+</tr>
+<tr>
+<td><code>관측 효과(건당)</code> / <code>통제군 표본수</code> / <code>처리군 표본수</code></td>
+<td><code>impact_panel.csv</code></td>
+<td>대시보드에서 CSV 읽어 포맷(<code>krw</code>, <code>fmt_int</code>)</td>
+<td><code>impact_panel.py</code></td>
+</tr>
+<tr>
+<td><code>대기 건수</code> / <code>SLA 위반</code> / <code>처리 완료</code></td>
+<td><code>review_queue.csv</code> 또는 ledger 파생</td>
+<td><code>src.telemetry.compute_ops_kpis()</code> 또는 대시보드 집계</td>
+<td>운영/데모 생성 로직</td>
+</tr>
+</tbody></table>
 
 ---
 

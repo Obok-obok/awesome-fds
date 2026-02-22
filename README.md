@@ -55,32 +55,69 @@
 
 <div align="left">
 
-```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 50, 'rankSpacing': 70}, 'themeVariables': {'fontSize': '16px'}}}%%
-flowchart TD
+<div align="left">
 
-A[Claims] --> B[Features]
-B --> C[Model]
-C --> D[Scoring]
-D --> E[Experiment]
-E --> F[Impact]
-F --> G[Statistical Test]
-G --> H[Guardrail]
-H --> I[Report & Dashboard]
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520" role="img" aria-label="Claim FDS Architecture">
+  <style>
+    .box { fill: #ffffff; stroke: #2b2b2b; stroke-width: 1.2; rx: 10; ry: 10; }
+    .title { font: 600 16px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; fill: #111; }
+    .desc { font: 13px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; fill: #444; }
+    .arrow { stroke: #2b2b2b; stroke-width: 1.4; fill: none; marker-end: url(#m); }
+    .note { fill: #f7f7f7; stroke: #bdbdbd; stroke-width: 1; rx: 10; ry: 10; }
+  </style>
 
-A --- A1[원천 청구 데이터 수집]
-B --- B1[인코딩 / 스케일링 / 파생변수 생성]
-C --- C1[모델 학습 및 확률 보정]
-D --- D1[청구별 리스크 점수 산출]
-E --- E1[처리군 / 통제군 배정]
-F --- F1[평균 절감 효과 계산]
-G --- G1[p-value 산출 및 유의성 검정]
-H --- H1[확장 여부 자동 판정]
-I --- I1[임원 리포트 및 대시보드 제공]
+  <defs>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2b2b2b" />
+    </marker>
+  </defs>
 
-classDef explain fill:#f7f7f7,stroke:#999,font-size:14px;
-class A1,B1,C1,D1,E1,F1,G1,H1,I1 explain;
-```
+  <rect class="box" x="30"  y="30"  width="260" height="44" />
+  <rect class="box" x="30"  y="92"  width="260" height="44" />
+  <rect class="box" x="30"  y="154" width="260" height="44" />
+  <rect class="box" x="30"  y="216" width="260" height="44" />
+  <rect class="box" x="30"  y="278" width="260" height="44" />
+  <rect class="box" x="30"  y="340" width="260" height="44" />
+  <rect class="box" x="30"  y="402" width="260" height="44" />
+  <rect class="box" x="30"  y="464" width="260" height="44" />
+
+  <text class="title" x="55" y="58">Claims</text>
+  <text class="title" x="55" y="120">Features</text>
+  <text class="title" x="55" y="182">Model</text>
+  <text class="title" x="55" y="244">Scoring</text>
+  <text class="title" x="55" y="306">Experiment</text>
+  <text class="title" x="55" y="368">Impact</text>
+  <text class="title" x="55" y="430">Statistical Test</text>
+  <text class="title" x="55" y="492">Guardrail → Report</text>
+
+  <path class="arrow" d="M160,74 L160,92" />
+  <path class="arrow" d="M160,136 L160,154" />
+  <path class="arrow" d="M160,198 L160,216" />
+  <path class="arrow" d="M160,260 L160,278" />
+  <path class="arrow" d="M160,322 L160,340" />
+  <path class="arrow" d="M160,384 L160,402" />
+  <path class="arrow" d="M160,446 L160,464" />
+
+  <rect class="note" x="330" y="28"  width="620" height="48" />
+  <rect class="note" x="330" y="90"  width="620" height="48" />
+  <rect class="note" x="330" y="152" width="620" height="48" />
+  <rect class="note" x="330" y="214" width="620" height="48" />
+  <rect class="note" x="330" y="276" width="620" height="48" />
+  <rect class="note" x="330" y="338" width="620" height="48" />
+  <rect class="note" x="330" y="400" width="620" height="48" />
+  <rect class="note" x="330" y="462" width="620" height="48" />
+
+  <text class="desc" x="350" y="58">원천 청구 데이터 수집 및 적재 (입력 데이터)</text>
+  <text class="desc" x="350" y="120">인코딩 / 스케일링 / 파생변수 생성 (모델 입력 표준화)</text>
+  <text class="desc" x="350" y="182">학습·검증·보정 수행 (Champion/Challenger 포함)</text>
+  <text class="desc" x="350" y="244">청구별 리스크 점수 산출 및 결정 원장 생성</text>
+  <text class="desc" x="350" y="306">처리군/통제군 배정 (효과 측정 설계)</text>
+  <text class="desc" x="350" y="368">통제-처리 차이로 절감/전환율 등 성과 계산</text>
+  <text class="desc" x="350" y="430">Welch t-test 등으로 유의성(p-value) 검정</text>
+  <text class="desc" x="350" y="492">Guardrail 판정 후 임원 리포트/대시보드 제공</text>
+</svg>
+
+</div>
 
 </div>
 
@@ -263,11 +300,13 @@ scripts/   # (추가) 운영 재현 스크립트
 ## 10.1 평균 효과 (ATE)
 
 정책 적용에 따른 평균 절감 효과는 다음과 같이 정의함.
+
 $$
 \Delta = \mathbb{E}[Y \mid C] - \mathbb{E}[Y \mid T]
 $$
 
 표본 기준 계산식:
+
 $$
 \Delta = \bar{Y}_C - \bar{Y}_T
 $$
@@ -283,6 +322,7 @@ $$
 ## 10.2 Welch t-test (평균 차이 유의성 검정)
 
 두 집단 평균 차이가 우연인지 검정함.
+
 $$
 t =
 \frac{\bar{X}_C - \bar{X}_T}
@@ -294,6 +334,7 @@ $$
 - $n_C, n_T$: 표본 수  
 
 p-value 계산:
+
 $$
 p = P(|T| \ge |t|)
 $$
@@ -304,7 +345,6 @@ $$
 - t-test → 효과의 신뢰도  
 
 ---
-
 
 ## 10.3 HTE (세그먼트별 효과)
 
@@ -322,7 +362,6 @@ HTE는 “어디서 확대해야 하는가”를 결정하는 전략 지표임.
 
 ---
 
-
 ## 10.4 BH-FDR (다중검정 보정)
 
 정렬된 p-value에 대해:
@@ -338,19 +377,11 @@ $$
 
 ---
 
-
 ## 10.5 Guardrail 의사결정 조건
 
 정책 확대 조건:
 
 $$
-Scale =
-\begin{cases}
-1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\
-0 & \text{otherwise}
-\end{cases}
-$$
-
 Scale =
 \begin{cases}
 1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\

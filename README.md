@@ -333,11 +333,7 @@ $$
 - $s_C^2, s_T^2$: 분산  
 - $n_C, n_T$: 표본 수  
 
-p-value 계산:
-
-$$
-p = P(|T| \ge |t|)
-$$
+p-value 계산: $p = P(|T| \ge |t|)$
 
 의미:
 
@@ -348,12 +344,11 @@ $$
 
 ## 10.3 HTE (세그먼트별 효과)
 
-$$
-HTE_s =
-\mathbb{E}[Y \mid C, S=s]
--
-\mathbb{E}[Y \mid T, S=s]
-$$
+HTE는 “세그먼트별 ATE”를 의미함. 즉 특정 세그먼트 $S=s$에서의 처리/통제 평균 차이를 비교함.
+
+수식(인라인):
+
+$HTE_s = \mathbb{E}[Y \mid C, S=s] - \mathbb{E}[Y \mid T, S=s]$
 
 - $S=s$: 특정 세그먼트  
 
@@ -364,11 +359,9 @@ HTE는 “어디서 확대해야 하는가”를 결정하는 전략 지표임.
 
 ## 10.4 BH-FDR (다중검정 보정)
 
-정렬된 p-value에 대해:
+정렬된 p-value에 대해(인라인):
 
-$$
-p_{(i)} \le \frac{i}{m}\alpha
-$$
+$p_{(i)} \le \frac{i}{m}\alpha$
 
 - $m$: 검정 개수  
 - $\alpha$: 유의수준  
@@ -379,15 +372,12 @@ $$
 
 ## 10.5 Guardrail 의사결정 조건
 
-정책 확대 조건:
+Guardrail은 “재무 효과 + 통계적 신뢰 + 운영 안정성”을 동시에 충족할 때만 확장하도록 하는 통제 조건임.
 
-$$
-Scale =
-\begin{cases}
-1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\
-0 & \text{otherwise}
-\end{cases}
-$$
+의사결정 규칙(인라인):
+
+$Scale = 1 \;\; \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable}$  
+$Scale = 0 \;\; \text{otherwise}$
 
 ---
 

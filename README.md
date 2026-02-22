@@ -56,8 +56,9 @@
 <div align="left">
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 45, 'rankSpacing': 55}, 'themeVariables': {'fontSize': '14px'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 50, 'rankSpacing': 70}, 'themeVariables': {'fontSize': '16px'}}}%%
 flowchart TD
+
 A[Claims] --> B[Features]
 B --> C[Model]
 C --> D[Scoring]
@@ -66,6 +67,19 @@ E --> F[Impact]
 F --> G[Statistical Test]
 G --> H[Guardrail]
 H --> I[Report & Dashboard]
+
+A --- A1[원천 청구 데이터 수집]
+B --- B1[인코딩 / 스케일링 / 파생변수 생성]
+C --- C1[모델 학습 및 확률 보정]
+D --- D1[청구별 리스크 점수 산출]
+E --- E1[처리군 / 통제군 배정]
+F --- F1[평균 절감 효과 계산]
+G --- G1[p-value 산출 및 유의성 검정]
+H --- H1[확장 여부 자동 판정]
+I --- I1[임원 리포트 및 대시보드 제공]
+
+classDef explain fill:#f7f7f7,stroke:#999,font-size:14px;
+class A1,B1,C1,D1,E1,F1,G1,H1,I1 explain;
 ```
 
 </div>
@@ -291,7 +305,9 @@ $$
 
 ---
 
+
 ## 10.3 HTE (세그먼트별 효과)
+
 $$
 HTE_s =
 \mathbb{E}[Y \mid C, S=s]
@@ -301,13 +317,16 @@ $$
 
 - $S=s$: 특정 세그먼트  
 
-전체 평균만으로는 확장 전략 수립이 어려우며, HTE는 “어디서 확대해야 하는가”를 결정하는 전략 지표임.
+전체 평균만으로는 확장 전략 수립이 어려우며,  
+HTE는 “어디서 확대해야 하는가”를 결정하는 전략 지표임.
 
 ---
+
 
 ## 10.4 BH-FDR (다중검정 보정)
 
 정렬된 p-value에 대해:
+
 $$
 p_{(i)} \le \frac{i}{m}\alpha
 $$
@@ -319,10 +338,19 @@ $$
 
 ---
 
+
 ## 10.5 Guardrail 의사결정 조건
 
 정책 확대 조건:
+
 $$
+Scale =
+\begin{cases}
+1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
 Scale =
 \begin{cases}
 1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\

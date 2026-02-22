@@ -75,7 +75,7 @@ H --> I[Report and Dashboard]
 
 ---
 
-# 6. 레포 구조 (v5.5 실파일 기준)
+# 6. 레포 구조
 
 ```
 app_exec_dashboard.py
@@ -98,12 +98,12 @@ scripts/   # (추가) 운영 재현 스크립트
 
 아래 단계는 “산출물(out/) 생성 → 대시보드 렌더링”까지 표준 경로임
 
-## 7.1 데모 산출물 생성(권장 시작점)
+## 7.1 데모 산출물 생성
 - 파일: `src/simulate_production_outputs.py`
 - 목적: 운영 산출물(out/)을 모조 데이터로 일괄 생성 
 - 실행: `python -m src.simulate_production_outputs --scenario GO --days 120 --seed 42`  
 
-## 7.2 운영형 전체 파이프라인(학습→스코어링→효과→리포트)
+## 7.2 운영형 전체 파이프라인 (학습→스코어링→효과→리포트)
 - 학습: `python -m src.train`
 - 검증: `python -m src.validate`
 - 보정: `python -m src.calibrate`  
@@ -124,18 +124,18 @@ scripts/   # (추가) 운영 재현 스크립트
 
 본 섹션은 `app_exec_dashboard.py` 기준으로 “화면 표시 라벨”에 대한 기록  
 
-## 8.1 상단 KPI 영역(한 줄 요약)
+## 8.1 상단 KPI 영역
 | 표시 라벨 | 산출 값 | 주요 입력 | 계산 위치 |
 |---|---|---|---|
 | `MTD 절감(추정)` / `월 절감(추정)` | 월 누적 절감 추정 | `out/impact_monthly_timeseries.csv` 우선, 없으면 `out/decision_ledger.csv` | `src/telemetry.py` → `compute_saving_kpis()` |
 | `금일 청구 건수` | 금일 청구 n | `out/decision_ledger.csv` | `src/telemetry.py` → `compute_ops_kpis()` |
 | 배지 `GO/HOLD/ROLLBACK`, `p=...`, `경보 0건` | 상태/참고값 | `out/guardrails_decision.csv`, `out/segment_alerts.csv` | `app_exec_dashboard.py` → `guardrail()` |
 
-## 8.2 KPI 탭 라벨(표시 그대로)
+## 8.2 KPI 탭 라벨
 - KPI 탭: `재무 성과`, `운영 지표`, `품질·가드레일`  
 - 페이지 탭: `임원 요약`, `효과 분석`, `세그먼트·요인`, `운영`, `근거`  
 
-## 8.3 카드 라벨(표시 그대로)
+## 8.3 카드 라벨
 아래 라벨은 `card("...")` 호출하여 산출
 
 - `MTD 절감(추정)`, `SLA 위반`, `가드레일 상태`, `건당 지급 개선액`, `검토 전환율`, `관측 효과(건당)`, `금일 청구 건수`, `기간 청구 건수`, `대기 건수`, `분기 누적 절감(추정)`, `세그먼트 경보`, `월 절감(추정)`, `유의확률(p)`, `처리 비중`, `처리 완료`, `처리군 표본수`, `총 청구 건수`, `통제군 표본수`, `평균 리스크 점수`
@@ -191,7 +191,7 @@ pip install -r requirements.txt
 
 ---
 
-## 12.2 데모 산출물 생성 (권장)
+## 12.2 데모 산출물 생성
 
 ```bash
 python -m src.simulate_production_outputs --scenario GO --days 120 --seed 42
@@ -266,7 +266,7 @@ make dashboard
 
 ---
 
-## 12.5 Shell Script 기반 실행 (1회 실행)
+## 12.5 Shell Script 기반 실행
 
 Make 없이도 실행 가능하도록 bash 스크립트 제공
 
@@ -486,8 +486,7 @@ Guardrail은
 -   통계적 신뢰 확보
 -   운영 리스크 통제
 
-를 동시에 만족해야 확장하도록 하는\
-**의사결정 통제 프레임워크**
+를 동시에 만족해야 확장하도록 하는 **의사결정 통제 프레임워크**
 
 ------------------------------------------------------------------------
 

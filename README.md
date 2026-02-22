@@ -43,18 +43,19 @@
 
 # 4. 전체 아키텍처
 
-<div align="left" style="max-width:600px">
+<div align="left">
 
 ```mermaid
-flowchart LR
-A[Claims] --> B[Features]
-B --> C[Model]
-C --> D[Scoring]
-D --> E[Experiment]
-E --> F[Impact]
-F --> G[Test]
-G --> H[Guardrail]
-H --> I[Report]
+flowchart TD
+A[Claims] 
+--> B[Features]
+--> C[Model]
+--> D[Scoring]
+--> E[Experiment]
+--> F[Impact]
+--> G[Statistical Test]
+--> H[Guardrail]
+--> I[Report & Dashboard]
 ```
 
 </div>
@@ -93,7 +94,7 @@ data/
 models/
 out/
 src/
-scripts/  
+scripts/   # (추가) 운영 재현 스크립트
 ```
 
 ---
@@ -170,13 +171,11 @@ scripts/
 ## 10.1 평균 효과 (ATE)
 
 정책 적용에 따른 평균 절감 효과는 다음과 같이 정의함.
-
 $$
 \Delta = \mathbb{E}[Y \mid C] - \mathbb{E}[Y \mid T]
 $$
 
 표본 기준 계산식:
-
 $$
 \Delta = \bar{Y}_C - \bar{Y}_T
 $$
@@ -192,7 +191,6 @@ $$
 ## 10.2 Welch t-test (평균 차이 유의성 검정)
 
 두 집단 평균 차이가 우연인지 검정함.
-
 $$
 t =
 \frac{\bar{X}_C - \bar{X}_T}
@@ -204,7 +202,6 @@ $$
 - $n_C, n_T$: 표본 수  
 
 p-value 계산:
-
 $$
 p = P(|T| \ge |t|)
 $$
@@ -217,7 +214,6 @@ $$
 ---
 
 ## 10.3 HTE (세그먼트별 효과)
-
 $$
 HTE_s =
 \mathbb{E}[Y \mid C, S=s]
@@ -234,7 +230,6 @@ $$
 ## 10.4 BH-FDR (다중검정 보정)
 
 정렬된 p-value에 대해:
-
 $$
 p_{(i)} \le \frac{i}{m}\alpha
 $$
@@ -249,7 +244,6 @@ $$
 ## 10.5 Guardrail 의사결정 조건
 
 정책 확대 조건:
-
 $$
 Scale =
 \begin{cases}

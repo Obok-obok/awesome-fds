@@ -43,35 +43,39 @@
 
 # 4. 전체 아키텍처
 
+<div align="left" style="max-width:600px">
+
 ```mermaid
-flowchart TD
-A[Claims Data] --> B[Feature Engineering]
-B --> C[Model Training]
-C --> D[Batch Scoring]
-D --> E[Experiment Assignment]
-E --> F[Impact Measurement]
-F --> G[Statistical Significance]
-G --> H[Guardrail Decision]
-H --> I[Report and Dashboard]
+flowchart LR
+A[Claims] --> B[Features]
+B --> C[Model]
+C --> D[Scoring]
+D --> E[Experiment]
+E --> F[Impact]
+F --> G[Test]
+G --> H[Guardrail]
+H --> I[Report]
 ```
+
+</div>
 
 ---
 
 # 5. 아키텍처 구성요소별 목적 및 수행 내용
 
-| 구성요소 | 목적 | 무엇을 | 어떻게(주요 파일) |
-|---|---|---|---|
-| Claims Data | 분석/운영 입력 확보 | 청구 원천 데이터 적재 | `data/claims.csv`, 로딩 `src/io_utils.py` |
-| Feature Engineering | 모델 입력 정규화 | 인코딩/스케일링/파생변수 생성 | `src/features.py` |
-| Model Training | 점수 산출 모델 생성 | 학습/검증/보정 수행 | `src/train.py`, `src/validate.py`, `src/calibrate.py` |
-| Batch Scoring | 운영 점수 생성 | 청구별 score/결정 원장 생성 | `src/score_batch_prod.py` → `out/decision_ledger.csv` |
-| Experiment Assignment | 효과 측정 설계 | CONTROL/TREATMENT 배정 | `src/experiment.py` (`assign_group`) |
-| Impact Measurement | 재무 효과 산출 | 통제-처리 차이 및 추세 생성 | `src/impact_panel.py`, `out/impact_panel.csv` |
-| Statistical Significance | 유의성 검증 | Welch t-test로 p-value 산출 | `src/stats_impact_scipy.py`, `out/impact_significance_scipy.csv` |
-| Segment Alerts | 리스크 집중 감시 | 세그먼트 다중검정/경보 생성 | `src/segment_alerts.py` (`bh_fdr`) |
-| Guardrail Decision | 확장 안전장치 | GO/HOLD/ROLLBACK 판정 | `src/guardrails.py` (`main`, `_emit`) |
-| Report Generation | 결과 산출물 제공 | md/pdf/차트 생성 | `src/executive_report.py`, `src/pdf_onepager.py`, `src/executive_charts.py` |
-| Dashboard & Email | 소비 채널 제공 | 대시보드 표시/메일 발송 | `app_exec_dashboard.py`, `src/send_report_email.py` |
+| 구성요소 | 목적 | 주요 파일 |
+|---|---|---|
+| Claims Data | 분석/운영 입력 확보 | `data/claims.csv`, `src/io_utils.py` |
+| Feature Engineering | 모델 입력 정규화 | `src/features.py` |
+| Model Training | 점수 산출 모델 생성 | `src/train.py`, `src/validate.py`, `src/calibrate.py` |
+| Batch Scoring | 운영 점수 생성 | `src/score_batch_prod.py` → `out/decision_ledger.csv` |
+| Experiment Assignment | 효과 측정 설계 | `src/experiment.py` (`assign_group`) |
+| Impact Measurement | 재무 효과 산출 | `src/impact_panel.py`, `out/impact_panel.csv` |
+| Statistical Significance | 유의성 검증 | `src/stats_impact_scipy.py`, `out/impact_significance_scipy.csv` |
+| Segment Alerts | 리스크 집중 감시 | `src/segment_alerts.py` (`bh_fdr`) |
+| Guardrail Decision | 확장 안전장치 | `src/guardrails.py` (`main`, `_emit`) |
+| Report Generation | 결과 산출물 제공 | `src/executive_report.py`, `src/pdf_onepager.py`, `src/executive_charts.py` |
+| Dashboard & Email | 소비 채널 제공 | `app_exec_dashboard.py`, `src/send_report_email.py` |
 
 ---
 
@@ -89,7 +93,7 @@ data/
 models/
 out/
 src/
-scripts/   # (추가) 운영 재현 스크립트
+scripts/  
 ```
 
 ---
@@ -161,15 +165,98 @@ scripts/   # (추가) 운영 재현 스크립트
 
 ---
 
-# 10. 통계/추정 로직 및 수식 (표)
+# 10. 통계/추정 로직 및 수식
 
-| 항목 | 목적 | 수식 | 구현 위치 |
-|---|---|---|---|
-| 평균 효과(절감) | 처리 정책의 평균 절감 확인 | \( \Delta = \mathbb{E}[Y\mid C] - \mathbb{E}[Y\mid T] \) | `src/impact_panel.py`(패널), KPI는 `src/telemetry.compute_saving_kpis()` |
-| HTE | 세그먼트별 효과 차이 확인 | \( HTE_s = \mathbb{E}[Y\mid C,S=s] - \mathbb{E}[Y\mid T,S=s] \) | `app_exec_dashboard.py` → `compute_hte()` |
-| Welch t-test | 평균 차이 유의성 검정 | \( t = \frac{\bar{X}_c-\bar{X}_t}{\sqrt{s_c^2/n_c + s_t^2/n_t}} \) | `src/stats_impact_scipy.py` → `main()` |
-| p-value | 우연일 확률 평가 | \( p = P(|T| \ge |t|) \) | `src/stats_impact_scipy.py` |
-| BH-FDR | 세그먼트 다중검정 보정 | \( q = \text{BH-FDR}(p_1,\dots,p_m) \) | `src/segment_alerts.py` → `bh_fdr()` |
+## 10.1 평균 효과 (ATE)
+
+정책 적용에 따른 평균 절감 효과는 다음과 같이 정의함.
+
+$$
+\Delta = \mathbb{E}[Y \mid C] - \mathbb{E}[Y \mid T]
+$$
+
+표본 기준 계산식:
+
+$$
+\Delta = \bar{Y}_C - \bar{Y}_T
+$$
+
+- $Y$: 지급액  
+- $C$: 통제군  
+- $T$: 처리군  
+
+의미: 정책 적용 후 지급액이 감소했다면 $\Delta > 0$ 이며 절감 효과 발생을 의미함.
+
+---
+
+## 10.2 Welch t-test (평균 차이 유의성 검정)
+
+두 집단 평균 차이가 우연인지 검정함.
+
+$$
+t =
+\frac{\bar{X}_C - \bar{X}_T}
+{\sqrt{\frac{s_C^2}{n_C} + \frac{s_T^2}{n_T}}}
+$$
+
+- $\bar{X}_C, \bar{X}_T$: 각 집단 평균  
+- $s_C^2, s_T^2$: 분산  
+- $n_C, n_T$: 표본 수  
+
+p-value 계산:
+
+$$
+p = P(|T| \ge |t|)
+$$
+
+의미:
+
+- ATE → 효과의 크기  
+- t-test → 효과의 신뢰도  
+
+---
+
+## 10.3 HTE (세그먼트별 효과)
+
+$$
+HTE_s =
+\mathbb{E}[Y \mid C, S=s]
+-
+\mathbb{E}[Y \mid T, S=s]
+$$
+
+- $S=s$: 특정 세그먼트  
+
+전체 평균만으로는 확장 전략 수립이 어려우며, HTE는 “어디서 확대해야 하는가”를 결정하는 전략 지표임.
+
+---
+
+## 10.4 BH-FDR (다중검정 보정)
+
+정렬된 p-value에 대해:
+
+$$
+p_{(i)} \le \frac{i}{m}\alpha
+$$
+
+- $m$: 검정 개수  
+- $\alpha$: 유의수준  
+
+목적: 우연히 좋아 보이는 세그먼트 제거 → 확장 리스크 통제
+
+---
+
+## 10.5 Guardrail 의사결정 조건
+
+정책 확대 조건:
+
+$$
+Scale =
+\begin{cases}
+1 & \text{if } \Delta > 0 \land p < 0.05 \land \text{Risk Stable} \\
+0 & \text{otherwise}
+\end{cases}
+$$
 
 ---
 

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520" role="img" aria-label="Claim FDS Architecture">
+  <defs>
+    <style>
+      .box { fill: #ffffff; stroke: #2b2b2b; stroke-width: 1.2; rx: 10; ry: 10; }
+      .title { font: 600 16px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; fill: #111; }
+      .desc { font: 13px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; fill: #444; }
+      .arrow { stroke: #2b2b2b; stroke-width: 1.4; fill: none; marker-end: url(#m); }
+      .note { fill: #f7f7f7; stroke: #bdbdbd; stroke-width: 1; rx: 10; ry: 10; }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2b2b2b"/>
+    </marker>
+  </defs>
+
+  <!-- Left column: steps -->
+  <rect class="box" x="30"  y="30"  width="260" height="44"/>
+  <rect class="box" x="30"  y="92"  width="260" height="44"/>
+  <rect class="box" x="30"  y="154" width="260" height="44"/>
+  <rect class="box" x="30"  y="216" width="260" height="44"/>
+  <rect class="box" x="30"  y="278" width="260" height="44"/>
+  <rect class="box" x="30"  y="340" width="260" height="44"/>
+  <rect class="box" x="30"  y="402" width="260" height="44"/>
+  <rect class="box" x="30"  y="464" width="260" height="44"/>
+
+  <text class="title" x="55" y="58">Claims</text>
+  <text class="title" x="55" y="120">Features</text>
+  <text class="title" x="55" y="182">Model</text>
+  <text class="title" x="55" y="244">Scoring</text>
+  <text class="title" x="55" y="306">Experiment</text>
+  <text class="title" x="55" y="368">Impact</text>
+  <text class="title" x="55" y="430">Statistical Test</text>
+  <text class="title" x="55" y="492">Guardrail → Report</text>
+
+  <!-- Vertical arrows -->
+  <path class="arrow" d="M160,74 L160,92"/>
+  <path class="arrow" d="M160,136 L160,154"/>
+  <path class="arrow" d="M160,198 L160,216"/>
+  <path class="arrow" d="M160,260 L160,278"/>
+  <path class="arrow" d="M160,322 L160,340"/>
+  <path class="arrow" d="M160,384 L160,402"/>
+  <path class="arrow" d="M160,446 L160,464"/>
+
+  <!-- Right column: explanations -->
+  <rect class="note" x="330" y="28"  width="620" height="48"/>
+  <rect class="note" x="330" y="90"  width="620" height="48"/>
+  <rect class="note" x="330" y="152" width="620" height="48"/>
+  <rect class="note" x="330" y="214" width="620" height="48"/>
+  <rect class="note" x="330" y="276" width="620" height="48"/>
+  <rect class="note" x="330" y="338" width="620" height="48"/>
+  <rect class="note" x="330" y="400" width="620" height="48"/>
+  <rect class="note" x="330" y="462" width="620" height="48"/>
+
+  <text class="desc" x="350" y="58">원천 청구 데이터 수집 및 적재 (입력 데이터)</text>
+  <text class="desc" x="350" y="120">인코딩 / 스케일링 / 파생변수 생성 (모델 입력 표준화)</text>
+  <text class="desc" x="350" y="182">학습·검증·보정 수행 (Champion/Challenger 포함)</text>
+  <text class="desc" x="350" y="244">청구별 리스크 점수 산출 및 결정 원장 생성</text>
+  <text class="desc" x="350" y="306">처리군/통제군 배정 (효과 측정 설계)</text>
+  <text class="desc" x="350" y="368">통제-처리 차이로 절감/전환율 등 성과 계산</text>
+  <text class="desc" x="350" y="430">Welch t-test 등으로 유의성(p-value) 검정</text>
+  <text class="desc" x="350" y="492">Guardrail 판정 후 임원 리포트/대시보드 제공</text>
+</svg>

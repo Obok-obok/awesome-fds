@@ -419,7 +419,7 @@ bash scripts/run_all.sh full
 
 ---
 
-# Appendix A. 통계 이론 설명 (샘플 데이터 예시 + 수식 포함)
+# Appendix. 통계 이론 (샘플 데이터 예시)
 
 아래는 단순 예시 데이터 기준 설명
 
